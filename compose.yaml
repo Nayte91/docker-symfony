@@ -1,0 +1,39 @@
+x-args: &default_args
+  COMPOSER_VERSION: ${COMPOSER_VERSION}
+  CADDY_VERSION: ${CADDY_VERSION}
+  PHP_VERSION: ${PHP_VERSION}
+  NODE_VERSION: ${NODE_VERSION}
+
+services:
+  webserver:
+    build:
+      context: .
+      dockerfile: system/Dockerfile
+      args: *default_args
+    depends_on:
+      - backend
+    volumes:
+      - ./system/webserver:/etc/caddy:ro
+      - webserver_data:/data:rw
+      - webserver_config:/config:rw
+
+  backend:
+    build:
+      context: .
+      dockerfile: system/Dockerfile
+      args: *default_args
+    depends_on:
+      - database
+
+  database:
+    image: mysql:${DATABASE_VERSION}
+    environment:
+      MYSQL_DATABASE: ${DATABASE_NAME:-app}
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD:-!ChangeMe!}
+    volumes:
+      - database_data:/var/lib/mysql:rw
+
+volumes:
+  database_data:
+  webserver_data:
+  webserver_config:

@@ -1,0 +1,32 @@
+services:
+  webserver:
+    build:
+      target: server__caddy--prod
+    command: /usr/bin/caddy run --config /etc/caddy/Caddyfile.prod
+    labels:
+      traefik.http.routers.sfVI.rule: Host(`street-fighter-6.anagraph.org`)
+      traefik.http.routers.sfVI.entrypoints: websecure
+      traefik.http.routers.sfVI.tls.certresolver: leresolver
+      traefik.http.routers.unsecure-sfVI.rule: Host(`street-fighter-6.anagraph.org`)
+      traefik.http.routers.unsecure-sfVI.entrypoints: web
+    volumes:
+      - public_folder:/app/public:rw
+    networks:
+      - proxy
+      - default
+
+  backend:
+    build:
+      target: backend__php--prod
+    environment:
+      - "CORS_ALLOW_ORIGIN=https?://.*\\.anagraph\\.org"
+    volumes:
+      - public_folder:/app/public:ro
+
+networks:
+  proxy:
+    external: true
+    name: reverse_proxy_network
+
+volumes:
+  public_folder:

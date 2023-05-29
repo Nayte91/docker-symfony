@@ -1,0 +1,11 @@
+localhost:8080
+
+log
+
+route {
+    root * /app/public
+    push
+    php_fastcgi backend:9000
+    encode gzip
+    file_server
+}
